@@ -31,6 +31,16 @@ npm run dev
 ## Build log
 - [x] Project scaffold (Vite + Tailwind + Router)
 - [x] Home, About, Services pages
-- [ ] Clients, Pricing, Journal, Contact pages
-- [ ] Supabase schema + Netlify function for contact form
-- [ ] Final polish pass (animations, responsiveness, SEO)
+- [x] Clients, Pricing, Journal, Contact pages
+- [x] Supabase schema (`supabase/migrations/0001_create_leads_table.sql`)
+- [x] Netlify Function for contact form + newsletter signup (`netlify/functions/submit-lead.js`)
+- [x] Bundle splitting (three.js / framer-motion / vendor chunks)
+- [ ] Provision real Supabase project + run migration
+- [ ] Connect repo to Netlify + set environment variables
+- [ ] Final polish pass (responsiveness check, SEO meta tags, favicon)
+
+## Deployment setup (once you're ready to go live)
+1. Create a Supabase project, then run `supabase/migrations/0001_create_leads_table.sql` against it (SQL Editor or CLI).
+2. In Netlify: "Add new site" → import this GitHub repo. Build command and publish directory are already configured in `netlify.toml`.
+3. In Netlify site settings → Environment variables, add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (see `.env.example`).
+4. Deploy. The contact form and newsletter signup will start writing to the `leads` table immediately.

@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+::selection {
+  background: theme("colors.brass.light");
+  color: theme("colors.blueprint.deep");
+}
+
+:focus-visible {
+  outline: 2px solid theme("colors.brass.DEFAULT");
+  outline-offset: 3px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Sheet label — small architectural drawing-sheet reference, e.g. "SHEET A-101" */
+.sheet-label {
+  font-family: theme("fontFamily.mono");
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+/* Crop marks at the corners of a "drawing sheet" section */
+.crop-marks {
+  position: relative;
+}
+.crop-marks::before,
+.crop-marks::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: theme("colors.brass.DEFAULT");
+  opacity: 0.6;
+}
+.crop-marks::before {
+  top: 0;
+  left: 0;
+  border-top: 1.5px solid;
+  border-left: 1.5px solid;
+}
+.crop-marks::after {
+  bottom: 0;
+  right: 0;
+  border-bottom: 1.5px solid;
+  border-right: 1.5px solid;
+}
+
+/* Blueprint grid backdrop */
+.blueprint-grid {
+  background-color: theme("colors.blueprint.deep");
+  background-image: theme("backgroundImage.blueprint-grid");
+  background-size: theme("backgroundSize.grid");
+}
+
+/* Leader line + label, architectural callout style */
+.leader {
+  position: relative;
+}
+.leader::before {
+  content: "";
+  position: absolute;
+  width: 1px;
+  background: theme("colors.brass.DEFAULT");
+}
+
+.drafting-rule {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    theme("colors.blueprint.line"),
+    transparent
+  );
+}
+
+.text-balance {
+  text-wrap: balance;
+}

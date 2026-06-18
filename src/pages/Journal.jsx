@@ -34,7 +34,7 @@ function NewsletterForm() {
     setStatus("loading");
     setErrorMsg("");
     try {
-      const res = await fetch("/.netlify/functions/submit-lead", {
+      const res = await fetch("/api/submit-lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ inquiry_type: "newsletter", email: email.trim() }),

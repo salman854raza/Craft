@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
+import ScrollToTop from "./components/ScrollToTop.jsx";
 import Home from "./pages/Home.jsx";
 import About from "./pages/About.jsx";
 import Services from "./pages/Services.jsx";
@@ -30,6 +31,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <ScrollToTop />
       <Navbar />
       <AnimatePresence mode="wait">
         <PageTransition key={location.pathname}>

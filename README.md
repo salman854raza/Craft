@@ -33,14 +33,22 @@ npm run dev
 - [x] Home, About, Services pages
 - [x] Clients, Pricing, Journal, Contact pages
 - [x] Supabase schema (`supabase/migrations/0001_create_leads_table.sql`)
-- [x] Vercel Serverless Function for contact form + newsletter signup (`api/submit-lead.js`)
+- [x] Supabase project provisioned (Mumbai, free tier) — leads table live
+- [x] Vercel Serverless Function (`api/submit-lead.js`) for contact form + newsletter
 - [x] Bundle splitting (three.js / framer-motion / vendor chunks)
-- [ ] Provision real Supabase project + run migration
+- [x] `vercel.json` SPA rewrites
 - [ ] Connect repo to Vercel + set environment variables
-- [ ] Final polish pass (responsiveness check, SEO meta tags, favicon)
+- [ ] SEO meta tags, Open Graph, favicon
+- [ ] Responsiveness polish pass
+- [ ] Page transition animations
 
-## Deployment setup (once you're ready to go live)
-1. Create a Supabase project, then run `supabase/migrations/0001_create_leads_table.sql` against it (SQL Editor or CLI).
-2. In Vercel: import this GitHub repo as a new project. Vite is auto-detected; `vercel.json` already handles SPA routing and `/api/submit-lead.js` is picked up automatically as a Serverless Function.
-3. In Vercel Project Settings → Environment Variables, add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (see `.env.example`).
-4. Deploy. The contact form and newsletter signup will start writing to the `leads` table immediately.
+## Deployment setup
+1. ✅ **Supabase project provisioned** — "Ashlar Studio", Mumbai region (ap-south-1)
+   - Project URL: `https://utllswqajudzehlfwryv.supabase.co`
+   - `leads` table migration already applied
+   - Get your `service_role` key from: Supabase Dashboard → Project Settings → API
+2. **Vercel** — import `salman854raza/Craft` from GitHub (Vite is auto-detected, `vercel.json` handles SPA routing, `api/submit-lead.js` is auto-detected as a Serverless Function — no extra config needed)
+3. In Vercel Project Settings → Environment Variables, add:
+   - `SUPABASE_URL` = `https://utllswqajudzehlfwryv.supabase.co`
+   - `SUPABASE_SERVICE_ROLE_KEY` = _(your service_role secret from Supabase dashboard)_
+4. Deploy — every `git push` to `main` will auto-redeploy.

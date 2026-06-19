@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import PageHero from "../components/PageHero.jsx";
 import Reveal from "../components/Reveal.jsx";
+import usePageMeta from "../hooks/usePageMeta.js";
 
 const SERVICES = [
   {
@@ -58,6 +59,7 @@ const SERVICES = [
 ];
 
 export default function Services() {
+  usePageMeta("/services");
   return (
     <>
       <PageHero

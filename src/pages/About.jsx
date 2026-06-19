@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import PageHero from "../components/PageHero.jsx";
 import Reveal from "../components/Reveal.jsx";
+import usePageMeta from "../hooks/usePageMeta.js";
 import AnimatedCounter from "../components/AnimatedCounter.jsx";
 
 const TIMELINE = [
@@ -22,6 +23,7 @@ const TEAM = [
 const LOGOS = ["Greenford Developments", "Mill & Co.", "Northbank Capital", "Heritage Trust", "Selkie Homes"];
 
 export default function About() {
+  usePageMeta("/about");
   return (
     <>
       <PageHero

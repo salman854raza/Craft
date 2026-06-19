@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ShieldCheck, BadgeDollarSign, Scale, UserCheck, Check, ChevronDown } from "lucide-react";
 import PageHero from "../components/PageHero.jsx";
 import Reveal from "../components/Reveal.jsx";
+import usePageMeta from "../hooks/usePageMeta.js";
 
 const TRUST_POINTS = [
   { icon: ShieldCheck, title: "Fixed-fee certainty", copy: "Scope is agreed before work starts — no creeping hourly invoices." },
@@ -110,6 +111,7 @@ function FaqItem({ faq, isOpen, onToggle }) {
 }
 
 export default function Pricing() {
+  usePageMeta("/pricing");
   const [openFaq, setOpenFaq] = useState(0);
 
   return (

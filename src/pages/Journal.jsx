@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Send, CheckCircle2, Loader2 } from "lucide-react";
 import PageHero from "../components/PageHero.jsx";
 import Reveal from "../components/Reveal.jsx";
+import usePageMeta from "../hooks/usePageMeta.js";
 
 const CATEGORIES = ["All", "Design", "Sustainability", "Process", "Case Study", "Studio News"];
 
@@ -84,6 +85,7 @@ function NewsletterForm() {
 }
 
 export default function Journal() {
+  usePageMeta("/journal");
   const [category, setCategory] = useState("All");
   const [page, setPage] = useState(1);
 

@@ -2,9 +2,11 @@ import React from "react";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import PageHero from "../components/PageHero.jsx";
 import Reveal from "../components/Reveal.jsx";
+import usePageMeta from "../hooks/usePageMeta.js";
 import ContactForm from "../components/ContactForm.jsx";
 
 export default function Contact() {
+  usePageMeta("/contact");
   return (
     <>
       <PageHero

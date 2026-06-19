@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Star } from "lucide-react";
 import PageHero from "../components/PageHero.jsx";
 import Reveal from "../components/Reveal.jsx";
+import usePageMeta from "../hooks/usePageMeta.js";
 
 const LOGOS = [
   "Greenford Developments",
@@ -64,6 +65,7 @@ const CASE_STUDIES = [
 ];
 
 export default function Clients() {
+  usePageMeta("/clients");
   return (
     <>
       <PageHero

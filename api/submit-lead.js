@@ -2,14 +2,14 @@
 //
 // Vercel Serverless Function. Handles both the Contact page form
 // (inquiry_type: "project") and the Journal page newsletter signup
-// (inquiry_type: "newsletter"). Writes directly to Supabase via the REST
-// API using the service role key, which is only ever available in this
-// server-side environment — never shipped to the browser.
+// (inquiry_type: "newsletter"). Writes to Supabase via the REST API
+// using the anon key held server-side — safe because RLS only permits
+// INSERT (no SELECT), so this key can write but never read leads data.
 //
 // Required environment variables (set in Vercel Project Settings →
-// Environment Variables, not in the repo):
-//   SUPABASE_URL               e.g. https://xxxxx.supabase.co
-//   SUPABASE_SERVICE_ROLE_KEY  service_role key from Supabase API settings
+// Environment Variables):
+//   SUPABASE_URL       e.g. https://utllswqajudzehlfwryv.supabase.co
+//   SUPABASE_ANON_KEY  anon/public key from Supabase API settings
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -58,10 +58,10 @@ export default async function handler(req, res) {
   }
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
-  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-    console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY env vars.");
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    console.error("Missing SUPABASE_URL or SUPABASE_ANON_KEY env vars.");
     return res.status(500).json({ error: "Server is not configured correctly. Please try again later." });
   }
 
@@ -80,8 +80,8 @@ export default async function handler(req, res) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        apikey: SUPABASE_SERVICE_ROLE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         Prefer: "return=minimal",
       },
       body: JSON.stringify(row),

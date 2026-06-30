@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, CheckCircle2, AlertCircle, ArrowRight } from "lucide-react";
+import { useAuth } from "../context/AuthContext.jsx";
+import { supabase } from "../lib/supabaseClient.js";
 
 const PROJECT_TYPES = [
   "Residential new-build",
@@ -21,9 +23,21 @@ const initialState = {
 };
 
 export default function ContactForm() {
+  const { user, profile } = useAuth();
   const [form, setForm] = useState(initialState);
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
   const [errorMsg, setErrorMsg] = useState("");
+
+  // Pre-fill name/email for logged-in users so they don't retype it.
+  useEffect(() => {
+    if (user) {
+      setForm((f) => ({
+        ...f,
+        name: f.name || profile?.full_name || profile?.username || "",
+        email: f.email || user.email || "",
+      }));
+    }
+  }, [user, profile]);
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -31,6 +45,12 @@ export default function ContactForm() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+
+    // Silent bot trap — pretend success, never write the row.
+    if (form.company) {
+      setStatus("success");
+      return;
+    }
 
     if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
       setStatus("error");
@@ -41,20 +61,23 @@ export default function ContactForm() {
     setStatus("loading");
     setErrorMsg("");
 
-    try {
-      const res = await fetch("/api/submit-lead", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ inquiry_type: "project", ...form }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Something went wrong. Please try again.");
-      setStatus("success");
-      setForm(initialState);
-    } catch (err) {
+    const { error } = await supabase.from("messages").insert({
+      user_id: user?.id || null,
+      name: form.name.trim(),
+      email: form.email.trim().toLowerCase(),
+      phone: form.phone.trim() || null,
+      project_type: form.project_type || null,
+      message: form.message.trim(),
+    });
+
+    if (error) {
       setStatus("error");
-      setErrorMsg(err.message || "Something went wrong. Please try again.");
+      setErrorMsg("Could not send your message right now. Please try again shortly.");
+      return;
     }
+
+    setStatus("success");
+    setForm(initialState);
   }
 
   if (status === "success") {

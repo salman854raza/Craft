@@ -11,6 +11,11 @@ import Clients from "./pages/Clients.jsx";
 import Pricing from "./pages/Pricing.jsx";
 import Journal from "./pages/Journal.jsx";
 import Contact from "./pages/Contact.jsx";
+import Signup from "./pages/Signup.jsx";
+import Login from "./pages/Login.jsx";
+import VerifyOtp from "./pages/VerifyOtp.jsx";
+import MyEnquiries from "./pages/MyEnquiries.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import NotFound from "./pages/NotFound.jsx";
 
 function PageTransition({ children }) {
@@ -43,6 +48,17 @@ export default function App() {
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/journal" element={<Journal />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/verify" element={<VerifyOtp />} />
+            <Route
+              path="/my-enquiries"
+              element={
+                <ProtectedRoute>
+                  <MyEnquiries />
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </PageTransition>

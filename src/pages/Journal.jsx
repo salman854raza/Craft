@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Send, CheckCircle2, Loader2 } from "lucide-react
 import PageHero from "../components/PageHero.jsx";
 import Reveal from "../components/Reveal.jsx";
 import usePageMeta from "../hooks/usePageMeta.js";
+import { supabase } from "../lib/supabaseClient.js";
 
 const CATEGORIES = ["All", "Design", "Sustainability", "Process", "Case Study", "Studio News"];
 
@@ -34,20 +35,21 @@ function NewsletterForm() {
     if (!email.trim()) return;
     setStatus("loading");
     setErrorMsg("");
-    try {
-      const res = await fetch("/api/submit-lead", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ inquiry_type: "newsletter", email: email.trim() }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Something went wrong. Please try again.");
-      setStatus("success");
-      setEmail("");
-    } catch (err) {
+
+    const { error } = await supabase
+      .from("newsletter_subscribers")
+      .insert({ email: email.trim().toLowerCase() });
+
+    // Treat "already subscribed" (unique constraint violation) as success
+    // rather than an error — it's not actionable for the user.
+    if (error && error.code !== "23505") {
       setStatus("error");
-      setErrorMsg(err.message);
+      setErrorMsg("Something went wrong. Please try again.");
+      return;
     }
+
+    setStatus("success");
+    setEmail("");
   }
 
   if (status === "success") {

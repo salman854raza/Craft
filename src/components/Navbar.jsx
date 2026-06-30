@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const NAV_LINKS = [
   { label: "Home", to: "/" },
@@ -15,6 +16,7 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const { isAuthenticated, profile } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -72,7 +74,33 @@ export default function Navbar() {
           ))}
         </div>
 
-        <div className="hidden lg:block">
+        <div className="hidden lg:flex items-center gap-4">
+          {isAuthenticated ? (
+            <Link
+              to="/my-enquiries"
+              className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                scrolled ? "text-ink/80 hover:text-blueprint" : "text-paper/90 hover:text-paper"
+              }`}
+            >
+              <span
+                className={`h-8 w-8 rounded-full flex items-center justify-center font-display text-xs font-semibold ${
+                  scrolled ? "bg-blueprint/10 text-blueprint" : "bg-paper/15 text-paper"
+                }`}
+              >
+                {(profile?.username || "?").slice(0, 1).toUpperCase()}
+              </span>
+              {profile?.username}
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
+                scrolled ? "text-ink/70 hover:text-blueprint" : "text-paper/85 hover:text-paper"
+              }`}
+            >
+              <User size={16} /> Log in
+            </Link>
+          )}
           <Link
             to="/contact"
             className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-all border ${
@@ -116,6 +144,31 @@ export default function Navbar() {
               {link.label}
             </NavLink>
           ))}
+          {isAuthenticated ? (
+            <NavLink
+              to="/my-enquiries"
+              onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                `py-3 border-b border-ink/10 font-display text-lg ${
+                  isActive ? "text-brass" : "text-ink"
+                }`
+              }
+            >
+              My account
+            </NavLink>
+          ) : (
+            <NavLink
+              to="/login"
+              onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                `py-3 border-b border-ink/10 font-display text-lg ${
+                  isActive ? "text-brass" : "text-ink"
+                }`
+              }
+            >
+              Log in
+            </NavLink>
+          )}
           <Link
             to="/contact"
             onClick={() => setOpen(false)}

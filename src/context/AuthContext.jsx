@@ -50,13 +50,20 @@ export function AuthProvider({ children }) {
    * template is configured to show {{ .Token }}). Returns { error }.
    */
   async function signUp({ email, password, username, fullName }) {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { username, full_name: fullName },
       },
     });
+
+    // Supabase returns status 200 with identities=[] for already-registered
+    // emails instead of an error — detect this and surface it clearly.
+    if (!error && data?.user && data.user.identities?.length === 0) {
+      return { error: { message: "An account with this email already exists. Please log in instead." } };
+    }
+
     return { error };
   }
 

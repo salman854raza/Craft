@@ -4,6 +4,7 @@ import { ShieldCheck, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import Reveal from "../components/Reveal.jsx";
 import usePageMeta from "../hooks/usePageMeta.js";
 import { useAuth } from "../context/AuthContext.jsx";
+import { supabase } from "../lib/supabaseClient.js";
 
 const CODE_LENGTH = 6;
 
@@ -17,11 +18,36 @@ export default function VerifyOtp() {
   const [digits, setDigits] = useState(Array(CODE_LENGTH).fill(""));
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
   const [errorMsg, setErrorMsg] = useState("");
-  const [resendState, setResendState] = useState("idle"); // idle | sending | sent
+  const [resendState, setResendState] = useState("idle");
   const inputRefs = useRef([]);
 
+  // Handle confirmation LINK clicks (Supabase puts ?token_hash=...&type=signup in the URL).
+  // This makes both the link-click flow AND the code-paste flow work.
   useEffect(() => {
-    if (!email) navigate("/signup", { replace: true });
+    const params = new URLSearchParams(window.location.search);
+    const tokenHash = params.get("token_hash");
+    const type = params.get("type");
+
+    if (tokenHash && type === "signup") {
+      setStatus("loading");
+      supabase.auth
+        .verifyOtp({ token_hash: tokenHash, type: "signup" })
+        .then(({ error }) => {
+          if (error) {
+            setStatus("error");
+            setErrorMsg("This confirmation link has expired or is invalid. Enter the code from your email, or request a new one.");
+          } else {
+            setStatus("success");
+            setTimeout(() => navigate("/my-enquiries"), 1200);
+          }
+        });
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    if (!email && !new URLSearchParams(window.location.search).get("token_hash")) {
+      navigate("/signup", { replace: true });
+    }
   }, [email, navigate]);
 
   function handleChange(i, value) {
@@ -57,15 +83,19 @@ export default function VerifyOtp() {
       setErrorMsg("Enter the full 6-digit code.");
       return;
     }
+    if (!email) {
+      setStatus("error");
+      setErrorMsg("Email address is missing. Please go back and sign up again.");
+      return;
+    }
 
     setStatus("loading");
     setErrorMsg("");
 
     const { error } = await verifyOtp({ email, token: code });
-
     if (error) {
       setStatus("error");
-      setErrorMsg(error.message || "That code didn't work. Check your email and try again.");
+      setErrorMsg("That code didn't work — it may have expired. Check your email or request a new code below.");
       return;
     }
 
@@ -74,13 +104,12 @@ export default function VerifyOtp() {
   }
 
   async function handleResend() {
+    if (!email) return;
     setResendState("sending");
     await resendOtp({ email });
     setResendState("sent");
     setTimeout(() => setResendState("idle"), 8000);
   }
-
-  if (!email) return null;
 
   return (
     <section className="min-h-screen flex items-center justify-center blueprint-grid py-32 px-6">
@@ -88,15 +117,22 @@ export default function VerifyOtp() {
         <ShieldCheck className="text-blueprint mx-auto" size={32} strokeWidth={1.5} />
         <p className="sheet-label text-brass mt-4">SHEET R-002 — VERIFICATION</p>
         <h1 className="font-display text-3xl font-semibold text-blueprint mt-2">Check your email</h1>
-        <p className="text-concrete text-sm mt-2">
-          We sent a 6-digit code to <span className="font-medium text-ink">{email}</span>. Copy it
-          from the email and paste or type it below.
+        <p className="text-concrete text-sm mt-2 leading-relaxed">
+          We sent a 6-digit code to{" "}
+          <span className="font-medium text-ink">{email || "your email"}</span>.
+          <br />Open the email, copy the code, and paste or type it below.
         </p>
 
         {status === "success" ? (
           <div className="flex flex-col items-center gap-2 mt-9 text-emerald-600">
             <CheckCircle2 size={32} />
-            <p className="font-medium">Verified — you're in.</p>
+            <p className="font-display text-lg font-semibold">Verified — you're in!</p>
+            <p className="text-concrete text-sm">Taking you to your account…</p>
+          </div>
+        ) : status === "loading" && !digits.some(Boolean) ? (
+          <div className="flex flex-col items-center gap-3 mt-9 text-concrete">
+            <Loader2 className="animate-spin text-blueprint" size={28} />
+            <p className="text-sm">Verifying your link…</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="mt-9">
@@ -111,14 +147,14 @@ export default function VerifyOtp() {
                   value={d}
                   onChange={(e) => handleChange(i, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(i, e)}
-                  className="h-13 w-11 sm:h-14 sm:w-12 text-center font-display text-xl font-semibold rounded-md border border-ink/15 focus:outline-none focus:border-blueprint transition-colors bg-paper"
+                  className="h-14 w-12 text-center font-display text-xl font-semibold rounded-md border border-ink/15 focus:outline-none focus:border-blueprint transition-colors bg-paper"
                 />
               ))}
             </div>
 
             {status === "error" && (
-              <div className="flex items-center justify-center gap-2 text-rose-600 text-sm mt-5">
-                <AlertCircle size={16} />
+              <div className="flex items-center justify-center gap-2 text-rose-600 text-sm mt-5 text-left">
+                <AlertCircle size={16} className="shrink-0" />
                 <span>{errorMsg}</span>
               </div>
             )}
@@ -129,28 +165,35 @@ export default function VerifyOtp() {
               className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-blueprint text-paper px-7 py-3.5 text-sm font-semibold hover:bg-blueprint-deep transition-colors disabled:opacity-60 mt-7"
             >
               {status === "loading" ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" /> Verifying…
-                </>
+                <><Loader2 size={16} className="animate-spin" /> Verifying…</>
               ) : (
                 "Verify & continue"
               )}
             </button>
 
-            <button
-              type="button"
-              onClick={handleResend}
-              disabled={resendState === "sending"}
-              className="text-sm text-concrete hover:text-blueprint transition-colors mt-5 disabled:opacity-60"
-            >
-              {resendState === "sent" ? "Code resent — check your email" : "Didn't get a code? Resend it"}
-            </button>
+            {email && (
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={resendState !== "idle"}
+                className="text-sm text-concrete hover:text-blueprint transition-colors mt-5 disabled:opacity-60 block mx-auto"
+              >
+                {resendState === "sent"
+                  ? "✓ Code resent — check your inbox"
+                  : resendState === "sending"
+                  ? "Sending…"
+                  : "Didn't get the code? Resend it"}
+              </button>
+            )}
           </form>
         )}
 
         <p className="text-concrete text-sm mt-7">
           Wrong email?{" "}
-          <Link to="/signup" className="text-blueprint font-medium border-b border-blueprint/30 hover:border-blueprint transition-colors">
+          <Link
+            to="/signup"
+            className="text-blueprint font-medium border-b border-blueprint/30 hover:border-blueprint transition-colors"
+          >
             Start over
           </Link>
         </p>
@@ -158,3 +201,4 @@ export default function VerifyOtp() {
     </section>
   );
 }
+

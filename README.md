@@ -79,3 +79,4 @@ This is a one-time dashboard change — already-deployed code doesn't need to ch
 - [x] Bundle splitting, scroll-to-top, page transitions
 - [ ] **Action needed:** set the OTP email template in Supabase dashboard (see above)
 - [ ] Connect repo to Vercel for live deployment
+# Last deploy: 2026-07-03 02:45 UTC — Resend SMTP configured, auth fully wired

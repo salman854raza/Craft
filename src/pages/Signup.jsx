@@ -11,9 +11,23 @@ const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 function extractMessage(err) {
   if (!err) return "";
   if (typeof err === "string") return err;
+
+  // Supabase 504 timeout — SMTP took too long
+  if (err.status === 504 || (typeof err.message === "string" && err.message.includes("504"))) {
+    return "The email server is taking too long to respond. Please wait 30 seconds and try again.";
+  }
+
+  // Standard message field
   if (typeof err.message === "string" && err.message) return err.message;
+
+  // Supabase sometimes uses error_description
   if (typeof err.error_description === "string") return err.error_description;
-  return "Something went wrong — please try again.";
+
+  // Nested error objects
+  if (err.error && typeof err.error === "object") return extractMessage(err.error);
+
+  // Fallback — never show {}
+  return "Something went wrong — please wait a moment and try again.";
 }
 
 export default function Signup() {
@@ -212,11 +226,16 @@ export default function Signup() {
           <button
             type="submit"
             disabled={formStatus === "loading"}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-blueprint text-paper px-7 py-3.5 text-sm font-semibold hover:bg-blueprint-deep transition-colors disabled:opacity-60 mt-1"
+            className="w-full inline-flex flex-col items-center justify-center gap-1 rounded-full bg-blueprint text-paper px-7 py-3.5 text-sm font-semibold hover:bg-blueprint-deep transition-colors disabled:opacity-60 mt-1"
           >
-            {formStatus === "loading"
-              ? <><Loader2 size={16} className="animate-spin" /> Creating account…</>
-              : "Create account →"}
+            {formStatus === "loading" ? (
+              <>
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin" /> Creating account…
+                </span>
+                <span className="text-paper/60 text-xs font-normal">Sending confirmation email, please wait…</span>
+              </>
+            ) : "Create account →"}
           </button>
         </form>
 

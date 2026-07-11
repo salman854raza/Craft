@@ -12,8 +12,16 @@ function extractMessage(err) {
   if (!err) return "";
   if (typeof err === "string") return err;
 
+  const msg = typeof err.message === "string" ? err.message : "";
+
+  // Resend sandbox mode — can only send to the account owner's own email
+  // until a domain is verified. This is the #1 real-world blocker.
+  if (msg.includes("Error sending confirmation email") || msg.includes("only send testing emails")) {
+    return "We couldn't send the confirmation email to this address yet — our email sender is still in test mode and can only email the account owner. Please use salman854raza@gmail.com to test, or verify a domain in Resend to email other addresses.";
+  }
+
   // Supabase 504 timeout — SMTP took too long
-  if (err.status === 504 || (typeof err.message === "string" && err.message.includes("504"))) {
+  if (err.status === 504 || msg.includes("504")) {
     return "The email server is taking too long to respond. Please wait 30 seconds and try again.";
   }
 
